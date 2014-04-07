@@ -466,5 +466,25 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase
         }
         $this->assertEquals(count($ex), $i);
     }
+
+    public function testListNonExistentDirectory()
+    {
+        $c = $this->getRepository();
+
+        $this->assertEmpty(current($c->listDirectory('dne')));
+    }
+
+    public function testListDirectoryNotOnFilesystemWithRef()
+    {
+        $c = $this->getRepository();
+        $missingDirectoryName = current($c->listDirectory());
+        $this->assertStringStartsWith('dir', $missingDirectoryName);
+        $missingDirectoryContents = $c->listDirectory($missingDirectoryName, 'HEAD');
+        $this->assertNotEmpty($missingDirectoryContents);
+
+        $c->removeFile($missingDirectoryName, null, true);
+        $this->assertEmpty(current($c->listDirectory($missingDirectoryName, 'HEAD')));
+        $this->assertEquals($c->listDirectory($missingDirectoryName, 'HEAD^'), $missingDirectoryContents);
+    }
 }
 
