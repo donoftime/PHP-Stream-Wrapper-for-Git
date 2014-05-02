@@ -53,6 +53,17 @@ class InfoTest extends \PHPUnit_Framework_TestCase
             escapeshellarg('Initial commit')
         ));
 
+        Helper::executeGit(TESTS_REPO_PATH_1, 'branch test-branch');
+        $file   = sprintf('file_%d.txt', $i);
+        $path   = TESTS_REPO_PATH_1.'/'.$file;
+        file_put_contents($path, sprintf('File %d', $i));
+        Helper::executeGit(TESTS_REPO_PATH_1, sprintf('add %s',
+            escapeshellarg($file)
+        ));
+        Helper::executeGit(TESTS_REPO_PATH_1, sprintf('commit --message=%s',
+            escapeshellarg('Add commit not on test-branch')
+        ));
+
         clearstatcache();
     }
 
@@ -83,7 +94,10 @@ class InfoTest extends \PHPUnit_Framework_TestCase
     public function testGetBranches()
     {
         $c  = $this->getRepository();
-        $this->assertEquals(array('master'), $c->getBranches());
+        $this->assertEquals(array('master', 'test-branch'), $c->getBranches());
+
+        $changeset = Helper::executeGit(TESTS_REPO_PATH_1, 'git rev-parse HEAD');
+        $this->assertEquals(array('master'), $c->getBranches(Repository::BRANCHES_LOCAL, $changeset));
     }
 
     public function testGetStatus()

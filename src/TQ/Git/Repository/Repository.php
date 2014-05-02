@@ -928,9 +928,10 @@ class Repository extends AbstractRepository
      * Returns a list of the branches in the repository
      *
      * @param   integer     $which      Which branches to retrieve (all, local or remote-tracking)
+     * @param   string      $contains   Retrieve branches which contain the changeset
      * @return  array
      */
-    public function getBranches($which = self::BRANCHES_LOCAL)
+    public function getBranches($which = self::BRANCHES_LOCAL, $contains = '')
     {
         $which       = (int)$which;
         $arguments  = array(
@@ -944,6 +945,10 @@ class Repository extends AbstractRepository
             $arguments[] = '-a';
         } else if ($remote) {
             $arguments[] = '-r';
+        }
+        if ($contains) {
+            $arguments[] = '--contains';
+            $arguments[] = $contains;
         }
 
         /** @var $result CallResult */
